@@ -1,0 +1,20 @@
+{
+  "name": "com.pluginlit.ugui",
+  "displayName": "PluginLit Unity GUI Framework base on Addresable",
+  "version": "0.0.1",
+  "unity": "2019.2",
+  "description": "PluginLit Unity GUI Framework.",
+  "keywords": [
+    "pluginset",
+    "ugui"
+  ],
+  "dependencies": {
+    "com.unity.addressables": "1.19.19",
+    "com.pluginlit.core": "1.0.0",
+    "com.unity.ugui": "1.0.0"
+  },
+  "author": {
+    "name": "LyneXiao",
+    "email": "lixonxs@icloud.com"
+  }
+}
