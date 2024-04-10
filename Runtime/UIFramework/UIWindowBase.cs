@@ -12,7 +12,7 @@ namespace PluginLit.UGUI
 
         public int Tag { get; set; }
 
-        public virtual bool IsModal { get; }
+        public virtual bool IsModal { get; internal set; }
 
         public bool IsShown { get; protected set; }
         
@@ -72,11 +72,11 @@ namespace PluginLit.UGUI
         public void Constructor(bool asyncOpen = true)
         {
             _asyncOpen = asyncOpen;
-            Init();
+            InitRoot();
         }
         
 
-        private void Init()
+        protected void InitRoot(bool setup = true)
         {
             _transform = gameObject.GetComponent<RectTransform>();
             if (_transform == null)
@@ -85,7 +85,8 @@ namespace PluginLit.UGUI
             _transform.anchorMin = Vector2.zero;
             _transform.anchorMax = Vector2.one;
             
-            SetupAsset();
+            if (setup)
+                SetupAsset();
         }
 
         protected override void OnAssetReferenceChanged(AssetReference reference)
@@ -110,7 +111,7 @@ namespace PluginLit.UGUI
         {
             Panel = obj.GetComponent<RectTransform>();
             
-            if (enabled && !IsShown)
+            if (gameObject.activeInHierarchy && !IsShown)
                 DoShowAnimation();
         }
 
@@ -256,13 +257,15 @@ namespace PluginLit.UGUI
 
         public void Hide()
         {
-            if (enabled)
+            if (gameObject.activeInHierarchy)
                 DoHideAnimation();
         }
 
         public virtual void HideImmediately()
         {
+            OnDisable();
             Panel = null;
+            Destroy(gameObject);
         }
     }
 }

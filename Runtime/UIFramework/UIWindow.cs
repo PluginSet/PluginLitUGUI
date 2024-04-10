@@ -69,7 +69,7 @@ namespace PluginLit.UGUI
         public void PushArgs(params object[] args)
         {
             _args = args;
-            if (Panel != null && enabled)
+            if (Panel != null && gameObject.activeInHierarchy)
                 SetDataInternal();
         }
         

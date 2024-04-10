@@ -53,6 +53,9 @@ namespace PluginLit.UGUI
                 return;
             
             var reference = assets.GetBranchReference(UIBranch.Branch);
+            if (reference.RuntimeKey.Equals(string.Empty))
+                reference = null;
+            
             if (CurrentReference == reference)
                 return;
 

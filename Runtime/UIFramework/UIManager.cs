@@ -14,12 +14,13 @@ namespace PluginLit.UGUI
         
         public static readonly LayerMask UILayerMask = LayerMask.NameToLayer("UI");
         
-        private struct WindowInfo
+        private class WindowInfo
         {
             public string InstanceName;
             public Type WindowType;
             public bool IsSingleton;
             public int Tag;
+            public Func<GameObject, UIWindow> CreateWindowFunc;
         }
 
         private static readonly Dictionary<string, List<WindowInfo>> WindowInfos = new Dictionary<string, List<WindowInfo>>();
@@ -31,6 +32,36 @@ namespace PluginLit.UGUI
         public static void SetDefaultToastKey(string key)
         {
             _defaultToastKey = key;
+        }
+
+        public static void RegisterWindow(string name, string assetKey, bool isModal = false, bool asyncOpen = false,
+            bool isSingleton = true, int tag = 0)
+        {
+            RegisterWindow(name, new AssetReference(assetKey), isModal, asyncOpen, isSingleton, tag);
+        }
+        
+        public static void RegisterWindow(string name, AssetReference reference, bool isModal = false, bool asyncOpen = false, bool isSingleton = true, int tag = 0)
+        {
+            RegisterWindow<UIWindow>(name, reference, isModal, asyncOpen, isSingleton, tag);
+        }
+
+        public static void RegisterWindow<T>(string name, AssetReference reference, bool isModal = false, bool asyncOpen = false, bool isSingleton = true, int tag = 0) where T: UIWindow
+        {
+            RegisterWindow(name, typeof(T), reference, isModal, asyncOpen, isSingleton, tag);
+        }
+        
+        public static void RegisterWindow(string name, Type type, AssetReference reference, bool isModal = false, bool asyncOpen = false, bool isSingleton = true, int tag = 0)
+        {
+            RegisterWindow(name, type, isSingleton, tag, delegate(GameObject o)
+            {
+                var cmp = o.AddComponent(type) as UIWindow;
+                if (cmp != null)
+                {
+                    cmp.IsModal = isModal;
+                    cmp.Constructor(reference, asyncOpen);
+                }
+                return cmp;
+            });
         }
         
         public static void RegisterWindow<T>(string name, bool isSingleton = true, int tag = 0) where T: UIWindow
@@ -51,7 +82,7 @@ namespace PluginLit.UGUI
             return false;
         }
         
-        public static void RegisterWindow(string name, Type type, bool isSingleton = true, int tag = 0)
+        public static void RegisterWindow(string name, Type type, bool isSingleton = true, int tag = 0, Func<GameObject, UIWindow> createFunc = null)
         {
             if (WindowInfos.TryGetValue(name, out tempWindowInfos))
             {
@@ -78,6 +109,7 @@ namespace PluginLit.UGUI
                 WindowType = type,
                 IsSingleton = isSingleton,
                 Tag = tag,
+                CreateWindowFunc = createFunc,
             });
         }
         
@@ -147,6 +179,16 @@ namespace PluginLit.UGUI
 
             return false;
         }
+        
+        public static UIWindow Show(string name, params object[] args)
+        {
+            return Show<UIWindow>(name, args);
+        }
+
+        public static T Show<T>(string name, params object[] args) where T : UIWindow
+        {
+            return ShowOn<T>(UIRoot.Instance.DefaultLayer, name, args);
+        }
 
         public static T ShowOn<T>(UILayer layer, string name, params object[] args) where T: UIWindow
         {
@@ -170,7 +212,10 @@ namespace PluginLit.UGUI
                 };
 
                 gameObject.SetActive(false);
-                window = gameObject.AddComponent(info.WindowType) as T;
+                if (info.CreateWindowFunc == null)
+                    window = gameObject.AddComponent(info.WindowType) as T;
+                else
+                    window = info.CreateWindowFunc(gameObject) as T;
                 if (window == null)
                     throw new Exception($"Window component type {info.WindowType} is not base on UIWindow");
                 

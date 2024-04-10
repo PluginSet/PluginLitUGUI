@@ -1,9 +1,9 @@
 {
   "name": "com.pluginlit.ugui",
-  "displayName": "PluginLit Unity GUI Framework base on Addresable",
-  "version": "0.0.1",
+  "displayName": "PluginLit Unity GUI Framework",
+  "version": "1.0.0",
   "unity": "2019.2",
-  "description": "PluginLit Unity GUI Framework.",
+  "description": "PluginLit Unity GUI Framework base on Addresable.",
   "keywords": [
     "pluginset",
     "ugui"

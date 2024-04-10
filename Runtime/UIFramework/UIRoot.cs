@@ -29,6 +29,8 @@ namespace PluginLit.UGUI
         
         public Camera UICamera => Canvas.worldCamera;
 
+        public UILayer DefaultLayer { get; private set; }
+
         internal List<UILayer> Layers;
         
         private float _areaWith;
@@ -44,6 +46,7 @@ namespace PluginLit.UGUI
             UILayerApplySafeArea(layer);
             Layers.Add(layer);
             Layers.Sort();
+            DefaultLayer = Layers[Layers.Count - 1];
             return layer;
         }
         
@@ -61,6 +64,8 @@ namespace PluginLit.UGUI
             Layers = new List<UILayer>();
             Layers.AddRange(GetComponentsInChildren<UILayer>(true));
             Layers.Sort();
+            if (Layers.Count > 0)
+                DefaultLayer = Layers[Layers.Count - 1];
             
             var calculator = GetComponent<SafeAreaCalculator>();
             if (calculator != null)

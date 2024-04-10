@@ -105,6 +105,8 @@ namespace PluginLit.UGUI
         {
             if (_isFirstAwake)
             {
+                InitRoot(false);
+                
                 UIManager.RegisterWindow(this.name, this.GetType());
                 
                 if (!directShow)
@@ -113,7 +115,8 @@ namespace PluginLit.UGUI
                 _isFirstAwake = false;
             }
             
-            Panel = panelBehavior.GetComponent<RectTransform>();
+            if (panelBehavior != null)
+                Panel = panelBehavior.GetComponent<RectTransform>();
             base.Awake();
         }
 
