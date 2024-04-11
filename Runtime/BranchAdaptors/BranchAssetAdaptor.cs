@@ -19,7 +19,8 @@ namespace PluginLit.UGUI
 
             set
             {
-                _currentReference?.ReleaseAsset();
+                if (_currentReference != null && _currentReference.IsValid())
+                    _currentReference.ReleaseAsset();
                 _currentReference = value;
             }
         }

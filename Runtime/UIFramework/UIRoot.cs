@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -32,6 +33,9 @@ namespace PluginLit.UGUI
         public UILayer DefaultLayer { get; private set; }
 
         internal List<UILayer> Layers;
+
+        private Vector2 _screenSize;
+        private Rect _safeArea;
         
         private float _areaWith;
         private float _areaHeight;
@@ -54,6 +58,25 @@ namespace PluginLit.UGUI
         {
             return Layers.Find(layer => layer.name == objName);
         }
+
+        private bool GetSafeArea(out Rect rect)
+        {
+            Rect newRect;
+            var calculator = GetComponent<SafeAreaCalculator>();
+            if (calculator != null)
+            {
+                newRect = calculator.GetSafeArea();
+            }
+            else
+            {
+                newRect = new Rect(Vector2.zero, _screenSize);
+            }
+
+            var changed = !newRect.Equals(_safeArea);
+            rect = newRect;
+            
+            return changed;
+        }
         
         private void Awake()
         {
@@ -66,16 +89,26 @@ namespace PluginLit.UGUI
             Layers.Sort();
             if (Layers.Count > 0)
                 DefaultLayer = Layers[Layers.Count - 1];
+
+            _screenSize = new Vector2(Screen.width, Screen.height);
+            GetSafeArea(out var rect);
+            CalculateSafeArea(rect.x, rect.y, rect.width, rect.height);
+            _safeArea = rect;
+        }
+
+        private void Update()
+        {
+            if (Instance != this)
+                return;
+
+            if (Math.Abs(_screenSize.x - Screen.width) < 1 && Math.Abs(_screenSize.y - Screen.height) < 1)
+                return;
             
-            var calculator = GetComponent<SafeAreaCalculator>();
-            if (calculator != null)
+            _screenSize = new Vector2(Screen.width, Screen.height);
+            if (GetSafeArea(out var rect))
             {
-                var rect = calculator.GetSafeArea();
+                _safeArea = rect;
                 CalculateSafeArea(rect.x, rect.y, rect.width, rect.height);
-            }
-            else
-            {
-                Debug.LogError("UIRoot: SafeAreaCalculator is null");
             }
         }
 
